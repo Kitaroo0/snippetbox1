@@ -11,8 +11,7 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	// Because httprouter matches the "/" path exactly, we can now remove the
-	// manual check of r.URL.Path != "/" from this handler.
+
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, r, err)
@@ -43,21 +42,14 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
-// Add a new snippetCreate handler, which for now returns a placeholder
-// response. We'll update this shortly to show an HTML form.
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
-	// Initialize a new createSnippetForm instance and pass it to the template.
-	// Notice how this is also a great opportunity to set any default or
-	// 'initial' values for the form --- here we set the initial value for the
-	// snippet expiry to 365 days.
 	data.Form = snippetCreateForm{
 		Expires: 365,
 	}
 	app.render(w, r, http.StatusOK, "create.tmpl", data)
 }
 
-// Rename this handler to snippetCreatePost.
 type snippetCreateForm struct {
 	Title               string `form:"title"`
 	Content             string `form:"content"`
@@ -87,8 +79,6 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.serverError(w, r, err)
 		return
 	}
-	// Use the Put() method to add a string value ("Snippet successfully
-	// created!") and the corresponding key ("flash") to the session data.
 	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
